@@ -112,7 +112,7 @@ class SvgNode
             foreach($this->noeuds as $noeudIndex)
             {
                 /**
-                 * @var SvgNode[] $noeudIndex
+                 * @var SvgNode[] $noeudIndex tableau des noeuds
                  */
                 foreach($noeudIndex as $noeud)
                 {
