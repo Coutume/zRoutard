@@ -111,6 +111,9 @@ class SvgNode
 
             foreach($this->noeuds as $noeudIndex)
             {
+                /**
+                 * @var SvgNode[] $noeudIndex
+                 */
                 foreach($noeudIndex as $noeud)
                 {
                     $svg = $svg. $noeud->asString();
