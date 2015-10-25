@@ -4,42 +4,50 @@ ini_set('display_startup_errors',1);
 error_reporting(-1);
 
 // Doit impérativement être exécuté pour pouvoir charger les classes
-//spl_autoload_extensions(".php");
-//spl_autoload_register();
+include 'autoload.php';
 
-function my_autoload ($pClassName) {
-    $pClassName = str_replace("\\", "/", $pClassName);
-    include_once(__DIR__ . "/" . $pClassName . ".php");
-}
-spl_autoload_register("my_autoload");
-
+// TODO Revoir la structure de l'index
 try
 {
+    // Initialisation de la connexion à la base de données PostGres
+    // renseignée dans le fichier PgrImplementation/config.ini
     $co = new PgrImplementation\PgDefaultConnexion();
-    header('Content-Type: image/svg+xml');
-    header('charset=utf-8');
-    header('Vary: Accept-Encoding');
-    $time_start = microtime(true);
 
+    // Création de l'objet gérant l'accès aux tables d'une map
     $map = new PgrImplementation\PgMapTable("V5", $co, false);
 
-    $point = new PgrImplementation\PgEtapeNommee("SigiCoal III", $map);
-    $point2 = new PgrImplementation\PgEtapeNommee("PCDPC", $map);
+    if($_SERVER['REQUEST_METHOD'] === 'POST')
+    {
+        header('Content-Type: image/svg+xml');
+        header('charset=utf-8');
+        header('Vary: Accept-Encoding');
 
-    $itineraire = new PgrImplementation\PgItineraire($point, $point2, $map);
-    $trajet = $itineraire->calculerItineraire();
+        if(isset($_POST['depart']))
+        {
 
-    //var_dump($trajet->getPoints());
-    //$trajet->getDistance();
-    echo \Itineraire\Renderer\Svg\SvgRenderer::asSVG($trajet);
+            $depart = new PgrImplementation\PgEtapeNommee($_POST['depart'], $map);
 
-    $time_end = microtime(true);
+            if(isset($_POST['arrivee']))
+            {
+                $arrivee = new \PgrImplementation\PgEtapeNommee($_POST['arrivee'], $map);
 
+                $itineraire = new PgrImplementation\PgItineraire($depart, $arrivee, $map);
+                $trajet = $itineraire->calculerItineraire();
 
-    //echo $time_end - $time_start;
+                echo \Itineraire\Renderer\Svg\SvgRenderer::asSVG($trajet);
+            }
+        }
+    }
+    else
+    {
+        header('Content-Type: text/html');
+        header('charset=utf-8');
+        header('Vary: Accept-Encoding');
+        $gis = new \PgrImplementation\GisManager($map);
+        $destinations = $gis->getAllDestination();
 
-
-
+        include 'templatePageTest.php';
+    }
 }
 catch (Exception $e)
 {

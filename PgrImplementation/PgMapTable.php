@@ -21,6 +21,10 @@ use Exception\MapException;
 class PgMapTable
 {
     private $map;
+
+    /**
+     * @var PgDefaultConnexion Connexion à la base postgres configurée dans le fichier config.ini
+     */
     private $connexion;
 
     /**
